@@ -6,6 +6,9 @@ from seleniumbase import Driver
 from urllib.parse import urljoin, urlparse
 import json
 import hashlib
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 def setup_driver():
     print("Setting up driver...")
@@ -71,7 +74,7 @@ def download_images(urls, folder_name, existing_files):
 
 def get_pin_count(driver):
     try:
-        pin_count_element = driver.find_element('[data-test-id="pin-count"]')
+        pin_count_element = driver.find_element(By.CSS_SELECTOR, '[data-test-id="pin-count"]')
         pin_count_text = pin_count_element.text
         pin_count = int(''.join(filter(str.isdigit, pin_count_text)))
         print(f"Detected pin count: {pin_count}")
@@ -94,7 +97,9 @@ def scrape_pinterest_board(url, base_folder):
         print("Loading page...")
         driver.get(url)
         print("Waiting for images to load...")
-        driver.wait_for_element_present("img", timeout=30)
+        WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located((By.TAG_NAME, "img"))
+        )
         
         pin_count = get_pin_count(driver)
         if pin_count is None:
@@ -111,7 +116,7 @@ def scrape_pinterest_board(url, base_folder):
             print(f"Iteration {scroll_count + 1}")
             
             # Extract images
-            html_content = driver.get_page_source()
+            html_content = driver.page_source
             new_urls = set(extract_image_urls(html_content)) - all_urls
             all_urls.update(new_urls)
             

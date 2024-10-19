@@ -24,7 +24,7 @@ def scroll_once(driver):
 
 def extract_image_urls(html_content):
     print("Extracting image URLs...")
-    soup = BeautifulSoup(html_content, 'lxml')
+    soup = BeautifulSoup(html_content, 'html.parser')
     img_tags = soup.find_all('img', {'src': True})
     print(f"Found {len(img_tags)} img tags")
     urls = []
